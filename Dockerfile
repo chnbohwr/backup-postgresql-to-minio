@@ -1,9 +1,6 @@
-FROM alpine:3.13.0
-
+FROM postgres:15.0
 
 WORKDIR /app
-RUN apk add --no-cache postgresql-client  && \
-    rm -rf /var/cache/apk/*
 
 COPY run.sh run.sh
 COPY mc /usr/local/bin/mc

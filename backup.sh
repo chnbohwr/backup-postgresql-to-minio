@@ -60,7 +60,7 @@ POSTGRES_HOST_OPTS="-h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER $POSTG
 
 echo "Creating dump of ${POSTGRES_DATABASE} database from ${POSTGRES_HOST}..."
 
-pg_dump $POSTGRES_HOST_OPTS $POSTGRES_DATABASE | gzip > $HOME/tmp_dump.sql.gz
+pg_dumpall -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT -w | gzip > $HOME/tmp_dump.sql.gz
 
 echo "Uploading dump to $MINIO_BUCKET on $MINIO_SERVER"
 mc cp $HOME/tmp_dump.sql.gz minio/$MINIO_BUCKET/${POSTGRES_DATABASE}_$(date +"%Y-%m-%dT%H:%M:%SZ").sql.gz --insecure || exit 2
