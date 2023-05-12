@@ -8,4 +8,4 @@ COPY go-cron /usr/local/bin/go-cron
 COPY backup.sh backup.sh
 RUN chmod +x  /usr/local/bin/mc && chmod +x /usr/local/bin/go-cron
 
-CMD ["sh", "run.sh"]
+CMD ["bash", "run.sh"]
