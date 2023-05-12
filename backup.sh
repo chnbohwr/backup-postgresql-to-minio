@@ -62,9 +62,15 @@ echo "Creating dump of ${POSTGRES_DATABASE} database from ${POSTGRES_HOST}..."
 
 pg_dump $POSTGRES_HOST_OPTS $POSTGRES_DATABASE | gzip > $HOME/tmp_dump.sql.gz
 
-echo "Uploading dump to $MINIO_BUCKET"
+echo "Uploading dump to $MINIO_BUCKET on $MINIO_SERVER"
+mc cp $HOME/tmp_dump.sql.gz minio/$MINIO_BUCKET/${POSTGRES_DATABASE}_$(date +"%Y-%m-%dT%H:%M:%SZ").sql.gz --insecure || exit 2
 
-mc cp $HOME/tmp_dump.sql.gz minio/$MINIO_BUCKET/${POSTGRES_DATABASE}_$(date +"%Y-%m-%dT%H:%M:%SZ").sql.gz || exit 2
+if [ -n "${MINIO_SERVER2}" ]; then
+  echo "Uploading dump to $MINIO_BUCKET on $MINIO_SERVER2"
+  mc alias set minio2 "$MINIO_SERVER2" "$MINIO_ACCESS_KEY2" "$MINIO_SECRET_KEY2" --api "$MINIO_API_VERSION2" > /dev/null
+  mc cp $HOME/tmp_dump.sql.gz minio2/$MINIO_BUCKET2/${POSTGRES_DATABASE}_$(date +"%Y-%m-%dT%H:%M:%SZ").sql.gz --insecure || exit 2
+fi
+
 rm $HOME/tmp_dump.sql.gz 
 sync
 
