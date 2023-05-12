@@ -23,11 +23,6 @@ if [[ -z "${MINIO_SERVER}" ]]; then
   exit 1
 fi
 
-if [[ -z "${POSTGRES_DATABASE}" ]]; then
-  echo "You need to set the POSTGRES_DATABASE environment variable."
-  exit 1
-fi
-
 if [[ -z "${POSTGRES_HOST}"  ]]; then
   if [ -n "${POSTGRES_PORT_5432_TCP_ADDR}" ]; then
     POSTGRES_HOST=$POSTGRES_PORT_5432_TCP_ADDR
@@ -58,17 +53,17 @@ mc alias set minio "$MINIO_SERVER" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY" --api
 export PGPASSWORD=$POSTGRES_PASSWORD
 POSTGRES_HOST_OPTS="-h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER $POSTGRES_EXTRA_OPTS"
 
-echo "Creating dump of ${POSTGRES_DATABASE} database from ${POSTGRES_HOST}..."
+echo "Creating dump of databases from ${POSTGRES_HOST}..."
 
 pg_dumpall -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT -w | gzip > $HOME/tmp_dump.sql.gz
 
 echo "Uploading dump to $MINIO_BUCKET on $MINIO_SERVER"
-mc cp $HOME/tmp_dump.sql.gz minio/$MINIO_BUCKET/${POSTGRES_DATABASE}_$(date +"%Y-%m-%dT%H:%M:%SZ").sql.gz --insecure || exit 2
+mc cp $HOME/tmp_dump.sql.gz minio/$MINIO_BUCKET/dumpall_$(date +"%Y-%m-%dT%H:%M:%SZ").sql.gz --insecure || exit 2
 
 if [ -n "${MINIO_SERVER2}" ]; then
   echo "Uploading dump to $MINIO_BUCKET on $MINIO_SERVER2"
   mc alias set minio2 "$MINIO_SERVER2" "$MINIO_ACCESS_KEY2" "$MINIO_SECRET_KEY2" --api "$MINIO_API_VERSION2" > /dev/null
-  mc cp $HOME/tmp_dump.sql.gz minio2/$MINIO_BUCKET2/${POSTGRES_DATABASE}_$(date +"%Y-%m-%dT%H:%M:%SZ").sql.gz --insecure || exit 2
+  mc cp $HOME/tmp_dump.sql.gz minio2/$MINIO_BUCKET2/dumpall_$(date +"%Y-%m-%dT%H:%M:%SZ").sql.gz --insecure || exit 2
 fi
 
 rm $HOME/tmp_dump.sql.gz 
