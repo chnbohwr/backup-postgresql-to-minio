@@ -1,7 +1,5 @@
 #! /bin/bash
 
-set -e
-
 if [[ -z "${SCHEDULE}" ]]; then
   sh backup.sh 
 else
