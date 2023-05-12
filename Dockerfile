@@ -8,7 +8,4 @@ COPY go-cron /usr/local/bin/go-cron
 COPY backup.sh backup.sh
 RUN chmod +x  /usr/local/bin/mc && chmod +x /usr/local/bin/go-cron
 
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser
-
 CMD ["sh", "run.sh"]
